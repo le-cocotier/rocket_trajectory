@@ -4,44 +4,51 @@ from math import *
 from pygame.locals import *
 
 
-class Spacecraft:
+class Preview:
+  def __init__(self):
+    self.x = 8
+    self.y = 8
+    self.alpha = 90
+    self.masse = 220000
+    self.dt = 0.05
+    self.t = 0
+    self.g = 9.8
+    self.vx = 0
+    self.vy = 0
+
+  def new_coo(self):
+    if self.y >= 8:
+      self.t += self.dt
+      self.calcul_vitesse()
+      self.x += round(self.vx * self.dt, 2)
+      self.y += round(self.vy * self.dt, 2)
+    else:
+      self.y = 8
+      self.vx, self.vy = 0, 0
+    
+    pygame.display.flip()
+
+  def calcul_vitesse(self):
+    if self.y > 8:
+      self.vy += self.g * -1/2
+
+  def refresh(self):
+      screen.fill((0, 0, 0))
+      self.new_coo()
+
+
+class Rocket:
     def __init__(self):
-        self.x = 0
-        self.y = 0
-        self.force = 1 * (10 ** 5)
-        self.alpha = 60
-        self.dt = 0.1
-        self.t = 0
-        self.m = 90
-        self.g = 9.8
-        self.p = self.m * self.g
-        self.vx = cos(radians(self.alpha)) * self.force / self.p
-        self.vy = sin(radians(self.alpha)) * self.force / self.p
-        self.is_fly = False
+        self.x0, self.y0 = 0, 0
+        self.x1, self.y1 = 0, 0
+        self.x2, self.y2 = 0, 0
 
-    def new_coo(self):
-        self.t += self.dt
-        preview.calcul_vitesse()
-        self.x += self.vx * self.dt
-        self.y += self.vy * self.dt
-        pygame.draw.rect(screen, (255, 255, 255),(self.x, self.y, 2, 2))
-        pygame.display.flip()
-        if self.y >= 0:
-            self.is_fly = True
-        else:
-            self.is_fly = False
-
-    def calcul_vitesse(self):
-        self.vy += self.t ** 2 * self.g * -1/2
-
-    def acceleration(self, value):
-        self.vx += cos(radians(self.alpha)) * value
-        self.vy += sin(radians(self.alpha)) * value
-        print(cos(radians(self.alpha)) * value, sin(radians(self.alpha)) * value)
-
-    def refresh(self):
+    def draw(self):
         screen.fill((0, 0, 0))
-        self.new_coo()
+        self.x0, self.y0 = preview.x + sin(radians(preview.alpha)) * 8 - cos(radians(preview.alpha)) * 8, preview.y - cos(radians(preview.alpha)) * 8 - (sin(radians(preview.alpha)) * 8)
+        self.x1, self.y1 = preview.x - (sin(radians(preview.alpha)) * 8) - cos(radians(preview.alpha)) * 8, preview.y + (cos(radians(preview.alpha)) * 8) - sin(radians(preview.alpha)) * 8
+        self.x2, self.y2 = preview.x + cos(radians(preview.alpha)) * 16, preview.y + sin(radians(preview.alpha)) * 16
+        pygame.draw.polygon(screen, (255, 255, 255), ((self.x0, self.y0), (self.x1, self.y1), (self.x2, self.y2)))
 
 
 pygame.init()
@@ -51,32 +58,34 @@ pygame.key.set_repeat(250, 100)
 
 
 screen = pygame.display.set_mode((1200, 600), RESIZABLE)
-preview = Spacecraft()
+preview = Preview()
+rocket = Rocket()
 preview.refresh()
+rocket.draw()
 
 while running:
-    if preview.is_fly:
-        preview.new_coo()
-    for event in pygame.event.get():
-             
-            if event.type==QUIT: #la croix en haut à gauche
-                running=False
-                 
-            elif event.type==KEYDOWN:   #appui sur une touche
- 
-                if event.key==K_ESCAPE:
-                    running=False
+  preview.new_coo()
+  rocket.draw()
+  for event in pygame.event.get():
+    if event.type==QUIT: #la croix en haut à gauche
+      running=False
 
-                elif event.key == K_SPACE:
-                    preview.acceleration(100)
-                    print('hello')
-                     
-                elif event.key==K_UP:
-                    preview.alpha += 1
-                     
-                elif event.key==K_DOWN:
-                    preview.alpha -= 1
-    time.sleep(0.1)
+    elif event.type==KEYDOWN:   #appui sur une touche
+
+      if event.key==K_ESCAPE:
+        running=False
+
+      if event.key == K_SPACE:
+        preview.vx += cos(radians(preview.alpha)) * 20
+        preview.vy += sin(radians(preview.alpha)) * 20
+
+      if event.key == K_UP:
+        preview.alpha += 5
+
+      if event.key == K_DOWN:
+        preview.alpha -= 5
+  print(preview.alpha)
+  time.sleep(0.05)
 
 
 pygame.quit()
