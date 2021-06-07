@@ -58,11 +58,16 @@ class Moon:
         earth.g = self.g
         self.gravity_x = -(self.g * self.vecteur_directeur[0] / (self.vecteur_directeur[0] + self.vecteur_directeur[1]) / self.mass * echelle)
         self.gravity_y = -(self.g * self.vecteur_directeur[1] / (self.vecteur_directeur[0] + self.vecteur_directeur[1]) / self.mass * echelle)
-        self.velocity_x = self.vitesse * ((self.vecteur_directeur[0] - self.vecteur_directeur[0] + self.vecteur_directeur[1]) / (self.vecteur_directeur[0] + self.vecteur_directeur[1])) * echelle
-        self.velocity_y = self.vitesse * ((self.vecteur_directeur[1] - self.vecteur_directeur[1] + self.vecteur_directeur[0]) / (self.vecteur_directeur[0] + self.vecteur_directeur[1])) * echelle
-        print(self.velocity_x, self.velocity_y)
-        self.x += self.gravity_x
-        self.y += self.gravity_y
+        angle = math.atan2(self.vecteur_directeur[1], self.vecteur_directeur[0])  # Calculate angle between planets
+        d = math.sqrt((self.vecteur_directeur[0] ** 2) + (self.vecteur_directeur[1] ** 2))  # Calculate distance
+        if d == 0:
+            d = 0.000001  # Prevent division by zero error
+
+        self.velocity_x += (math.cos(angle) * self.g) / self.mass * echelle
+        self.velocity_y += (math.sin(angle) * self.g) / self.mass * echelle
+        self.x += self.gravity_x + self.velocity_x
+        self.y += self.gravity_y + self.velocity_y
+        print(self.x, self.y)
         pygame.draw.circle(screen, (100, 100, 100), (int(self.x), int(self.y)), int(self.radius * echelle))
 
 
